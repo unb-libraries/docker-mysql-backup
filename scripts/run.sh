@@ -8,4 +8,9 @@ do
 done
 
 FREQUENCY=${1:-hourly}
+
+echo "Configuration:"
+cat /etc/rsnapshot.conf
+echo "Running Backup..."
+
 /usr/bin/rsnapshot -c /etc/rsnapshot.conf $FREQUENCY
