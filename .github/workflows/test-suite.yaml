@@ -24,48 +24,65 @@ jobs:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         if: always()
 
-  build-image:
+  build-push-image:
     name: Build Image
     runs-on: ubuntu-latest
     needs: [slack-start]
     steps:
-      - uses: FranzDiebold/github-env-vars-action@v2.1.0
-      - uses: actions/checkout@v2
-      -
-        name: Set Image Tag
-        run: echo "BUILD_IMAGE_TAG=latest" >> $GITHUB_ENV
-      -
-        name: Set Image Name
-        run: echo "BUILD_IMAGE_NAME=mysql-backup" >> $GITHUB_ENV
+      - uses: actions/checkout@v3
+      - uses: FranzDiebold/github-env-vars-action@v2
       -
         name: Get current time
-        uses: gerred/actions/current-time@master
+        uses: josStorer/get-current-time@v2
         id: current-time
+        with:
+          format: YYYYMMDDHHMMSS
       -
-        name: Build Docker Image
+        name: Set Tag
+        env:
+          TIMESTAMP: "${{ steps.current-time.outputs.formattedTime }}"
+        run: echo "BUILD_IMAGE_TAG=$CI_SHA_SHORT-$TIMESTAMP" >> $GITHUB_ENV
+      -
+        name: Set Full Name
+        env:
+          TIMESTAMP: "${{ steps.current-time.outputs.formattedTime }}"
+        run: echo "BUILD_IMAGE_FULL_NAME=ghcr.io/$CI_REPOSITORY_OWNER_SLUG/$CI_REPOSITORY_NAME:$CI_SHA_SHORT-$TIMESTAMP" >> $GITHUB_ENV
+      -
+        name: Set Full Branch Name
+        env:
+          TIMESTAMP: "${{ steps.current-time.outputs.formattedTime }}"
+        run: echo "BUILD_IMAGE_BRANCH_NAME=ghcr.io/$CI_REPOSITORY_OWNER_SLUG/$CI_REPOSITORY_NAME:$CI_REF_NAME" >> $GITHUB_ENV
+      - name: Set up Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v2
+      -
+        name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ secrets.GH_CONTAINER_REGISTRY_USER }}
+          password: ${{ secrets.GH_CONTAINER_REGISTRY_TOKEN }}
+      -
+        name: Build and push
         env:
           TIMESTAMP: "${{ steps.current-time.outputs.time }}"
-        run: |
-          docker build \
-            --build-arg BUILD_DATE=$TIMESTAMP \
-            --build-arg VCS_REF=$CI_REF_NAME \
-            --build-arg VERSION=$BUILD_IMAGE_TAG \
-            --tag "ghcr.io/$CI_REPOSITORY_OWNER/$BUILD_IMAGE_NAME:$BUILD_IMAGE_TAG" \
-            .
-      -
-        name: Login to GHCR
-        run: echo $GH_CONTAINER_REGISTRY_TOKEN | docker login ghcr.io -u $GH_CONTAINER_REGISTRY_USER --password-stdin
-        env:
-          GH_CONTAINER_REGISTRY_TOKEN: ${{secrets.GH_CONTAINER_REGISTRY_TOKEN}}
-          GH_CONTAINER_REGISTRY_USER: ${{secrets.GH_CONTAINER_REGISTRY_USER}}
-      -
-        name: Push Image to GHCR
-        run: docker push "ghcr.io/$CI_REPOSITORY_OWNER/$BUILD_IMAGE_NAME:$BUILD_IMAGE_TAG"
+        uses: docker/build-push-action@v3
+        with:
+          pull       : true
+          push       : true
+          platforms  : linux/amd64,linux/arm64/v8
+          context    : .
+          file       : ./Dockerfile
+          tags       : ${{ env.BUILD_IMAGE_FULL_NAME }},${{ env.BUILD_IMAGE_BRANCH_NAME }}
+          build-args: |
+            BUILD_DATE=$TIMESTAMP
+            VCS_REF=${{ env.CI_REF_NAME }}
+            VERSION=${{ env.BUILD_IMAGE_TAG }}
 
   slack-results:
     name: Notify Slack of Build Results
     runs-on: ubuntu-latest
-    needs: [build-image]
+    needs: [build-push-image]
     steps:
       - uses: 8398a7/action-slack@v3
         with:
