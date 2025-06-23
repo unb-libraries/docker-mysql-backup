@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 set -x
-MYSQLDUMP=/usr/bin/mysqldump
+MYSQLDUMP=/usr/bin/mariadb-dump
 
 # Paths for temp files
 TMP_SCHEMA='/tmp/schema.sql'
@@ -12,6 +12,7 @@ IGNORE_TABLES_FULL_DUMP_CMD=""
 if [[ -n "$STRUCTURE_ONLY_TABLES" ]]; then
   echo "Dumping schema for structure tables..."
   $MYSQLDUMP \
+    --ssl-mode=DISABLED \
     --host="MYSQL_HOSTNAME" \
     --port="MYSQL_PORT" \
     --user="MYSQL_USER_NAME" \
@@ -32,6 +33,7 @@ fi
 # 2. Dump full DB
 echo "Dumping full database..."
 $MYSQLDUMP \
+  --ssl-mode=DISABLED \
   --host="MYSQL_HOSTNAME" \
   --port="MYSQL_PORT" \
   --user="MYSQL_USER_NAME" \
