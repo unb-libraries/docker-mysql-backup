@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 set -ex
-MYSQLDUMP=/usr/bin/mariadb-dump
+MYSQLDUMP=/usr/bin/mysqldump
 
 # Paths for temp files
 TMP_SCHEMA='/tmp/schema.sql'
