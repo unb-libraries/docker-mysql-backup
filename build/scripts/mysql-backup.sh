@@ -42,7 +42,7 @@ if [[ -n "$STRUCTURE_ONLY_TABLES" ]]; then
     --password="MYSQL_USER_PASSWORD" \
     --no-data \
     --databases MYSQL_DATABASE \
-    "$DB_NAME" \
+    "MYSQL_DATABASE" \
     --tables $STRUCTURE_ONLY_TABLES_EXPANDED > "$TMP_SCHEMA"
   echo "✅ Dumped schema for structure tables to: $TMP_SCHEMA"
 
@@ -65,7 +65,7 @@ $MYSQLDUMP \
   --quick \
   --skip-lock-tables \
   $IGNORE_TABLES_FULL_DUMP_CMD \
-  "$DB_NAME" > "$TMP_DATA"
+  "MYSQL_DATABASE" > "$TMP_DATA"
 echo "✅ Dumped full database to: $TMP_DATA"
 
 
