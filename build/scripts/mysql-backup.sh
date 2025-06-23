@@ -2,6 +2,18 @@
 set -ex
 MYSQLDUMP=/usr/bin/mysqldump
 
+resolve_tables() {
+  pattern="$1"  # e.g., cache_%
+  mysql \
+    --skip-ssl \
+    --host="MYSQL_HOSTNAME" \
+    --port="MYSQL_PORT" \
+    --user="MYSQL_USER_NAME" \
+    --password="MYSQL_USER_PASSWORD" \
+    --batch --skip-column-names \
+    -e "SHOW TABLES LIKE '${pattern}';" MYSQL_DATABASE
+}
+
 # Paths for temp files
 TMP_SCHEMA='/tmp/schema.sql'
 TMP_DATA='/tmp/MYSQL_DATABASE'
@@ -10,8 +22,16 @@ IGNORE_TABLES_FULL_DUMP_CMD=""
 
 # 1. Dump schema-only for structure tables
 if [[ -n "$STRUCTURE_ONLY_TABLES" ]]; then
+  echo "Resolving structure-only tables..."
+  STRUCTURE_ONLY_PATTERNS=$(echo "$STRUCTURE_ONLY_TABLES" | tr ',' ' ' | tr '*' '%')
+  STRUCTURE_ONLY_TABLES_EXPANDED=""
+  for pattern in $STRUCTURE_ONLY_PATTERNS; do
+    TABLES=$(resolve_tables "$pattern")
+    STRUCTURE_ONLY_TABLES_EXPANDED="$STRUCTURE_ONLY_TABLES_EXPANDED $TABLES"
+  done
+  echo "✅ Resolved structure-only tables: $STRUCTURE_ONLY_TABLES_EXPANDED"
+
   echo "Dumping schema for structure tables..."
-  STRUCTURE_ONLY_TABLES_LIST_SPACED=$(echo "$STRUCTURE_ONLY_TABLES" | tr ',' ' ')
   $MYSQLDUMP \
     --skip-ssl \
     --host="MYSQL_HOSTNAME" \
@@ -21,11 +41,11 @@ if [[ -n "$STRUCTURE_ONLY_TABLES" ]]; then
     --no-data \
     --databases MYSQL_DATABASE \
     "$DB_NAME" \
-    --tables $STRUCTURE_ONLY_TABLES_LIST_SPACED > "$TMP_SCHEMA"
+    --tables $STRUCTURE_ONLY_TABLES_EXPANDED > "$TMP_SCHEMA"
   echo "✅ Dumped schema for structure tables to: $TMP_SCHEMA"
 
   # Prepare ignore tables command for full dump
-  IGNORE_TABLES_FULL_DUMP_CMD=$(echo "$STRUCTURE_ONLY_TABLES" | sed 's/,/ --ignore-table=MYSQL_DATABASE./g' | sed 's/^/--ignore-table=MYSQL_DATABASE./')
+  IGNORE_TABLES_FULL_DUMP_CMD=$(echo "$STRUCTURE_ONLY_TABLES_EXPANDED" | sed 's/ / --ignore-table=MYSQL_DATABASE./g' | sed 's/^/--ignore-table=MYSQL_DATABASE./')
   TMP_DATA='/tmp/data.sql'
 fi
 
@@ -52,8 +72,10 @@ if [[ -n "$STRUCTURE_ONLY_TABLES" ]]; then
   cat "$TMP_SCHEMA" "$TMP_DATA" > "/tmp/MYSQL_DATABASE"
 fi
 
+
 # 4. Compress the final dump
 gzip -"$GZIP_COMPRESSION_LEVEL" "/tmp/MYSQL_DATABASE"
+
 
 # 5. Move to final location
 mv "/tmp/MYSQL_DATABASE.gz" "./MYSQL_DATABASE.gz"
