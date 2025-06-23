@@ -1,5 +1,5 @@
 #!/usr/bin/env sh
-set -x
+set -ex
 MYSQLDUMP=/usr/bin/mariadb-dump
 
 # Paths for temp files
