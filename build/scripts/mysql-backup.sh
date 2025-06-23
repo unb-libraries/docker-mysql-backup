@@ -11,6 +11,7 @@ IGNORE_TABLES_FULL_DUMP_CMD=""
 # 1. Dump schema-only for structure tables
 if [[ -n "$STRUCTURE_ONLY_TABLES" ]]; then
   echo "Dumping schema for structure tables..."
+  STRUCTURE_ONLY_TABLES_LIST_SPACED=$(echo "$STRUCTURE_ONLY_TABLES" | tr ',' ' ')
   $MYSQLDUMP \
     --skip-ssl \
     --host="MYSQL_HOSTNAME" \
@@ -20,7 +21,7 @@ if [[ -n "$STRUCTURE_ONLY_TABLES" ]]; then
     --no-data \
     --databases MYSQL_DATABASE \
     "$DB_NAME" \
-    --tables $STRUCTURE_ONLY_TABLES > "$TMP_SCHEMA"
+    --tables $STRUCTURE_ONLY_TABLES_LIST_SPACED > "$TMP_SCHEMA"
   echo "✅ Dumped schema for structure tables to: $TMP_SCHEMA"
 
   # Prepare ignore tables command for full dump
