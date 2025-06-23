@@ -42,7 +42,6 @@ if [[ -n "$STRUCTURE_ONLY_TABLES" ]]; then
     --password="MYSQL_USER_PASSWORD" \
     --no-data \
     --databases MYSQL_DATABASE \
-    "MYSQL_DATABASE" \
     --tables $STRUCTURE_ONLY_TABLES_EXPANDED > "$TMP_SCHEMA"
   echo "✅ Dumped schema for structure tables to: $TMP_SCHEMA"
 
