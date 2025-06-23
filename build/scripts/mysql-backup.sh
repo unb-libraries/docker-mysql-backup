@@ -18,15 +18,14 @@ if [[ -n "$STRUCTURE_ONLY_TABLES" ]]; then
     --user="MYSQL_USER_NAME" \
     --password="MYSQL_USER_PASSWORD" \
     --no-data \
-    --databases MYSQL_DATABASE
-    "$DB_NAME"  \
-    --tables $STRUCTURE_ONLY_TABLES \
-    > "$TMP_SCHEMA"
-    echo "✅ Dumped schema for structure tables to: $TMP_SCHEMA"
+    --databases MYSQL_DATABASE \
+    "$DB_NAME" \
+    --tables $STRUCTURE_ONLY_TABLES > "$TMP_SCHEMA"
+  echo "✅ Dumped schema for structure tables to: $TMP_SCHEMA"
 
-    # Prepare ignore tables command for full dump
-    IGNORE_TABLES_FULL_DUMP_CMD=$(echo "$STRUCTURE_ONLY_TABLES" | sed 's/,/ --ignore-table=MYSQL_DATABASE./g' | sed 's/^/--ignore-table=MYSQL_DATABASE./')
-    TMP_DATA='/tmp/data.sql'
+  # Prepare ignore tables command for full dump
+  IGNORE_TABLES_FULL_DUMP_CMD=$(echo "$STRUCTURE_ONLY_TABLES" | sed 's/,/ --ignore-table=MYSQL_DATABASE./g' | sed 's/^/--ignore-table=MYSQL_DATABASE./')
+  TMP_DATA='/tmp/data.sql'
 fi
 
 
