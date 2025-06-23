@@ -29,7 +29,9 @@ if [[ -n "$STRUCTURE_ONLY_TABLES" ]]; then
     TABLES=$(resolve_tables "$pattern")
     STRUCTURE_ONLY_TABLES_EXPANDED="$STRUCTURE_ONLY_TABLES_EXPANDED $TABLES"
   done
-  echo "✅ Resolved structure-only tables: $STRUCTURE_ONLY_TABLES_EXPANDED"
+  # Remove leading/trailing whitespace
+  STRUCTURE_ONLY_TABLES_EXPANDED=$(echo "$STRUCTURE_ONLY_TABLES_EXPANDED" | xargs)
+  echo "✅ Resolved structure-only tables: [$STRUCTURE_ONLY_TABLES_EXPANDED]"
 
   echo "Dumping schema for structure tables..."
   $MYSQLDUMP \
@@ -46,6 +48,7 @@ if [[ -n "$STRUCTURE_ONLY_TABLES" ]]; then
 
   # Prepare ignore tables command for full dump
   IGNORE_TABLES_FULL_DUMP_CMD=$(echo "$STRUCTURE_ONLY_TABLES_EXPANDED" | sed 's/ / --ignore-table=MYSQL_DATABASE./g' | sed 's/^/--ignore-table=MYSQL_DATABASE./')
+  echo "Prepared ignore tables command for full dump: [$IGNORE_TABLES_FULL_DUMP_CMD]"
   TMP_DATA='/tmp/data.sql'
 fi
 
@@ -74,6 +77,7 @@ fi
 
 
 # 4. Compress the final dump
+echo "Compressing the final dump..."
 gzip -"$GZIP_COMPRESSION_LEVEL" "/tmp/MYSQL_DATABASE"
 
 
