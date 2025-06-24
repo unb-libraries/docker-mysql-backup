@@ -2,6 +2,7 @@
 set -ex
 MYSQLDUMP=/usr/bin/mysqldump
 
+# Resolves existing table names based on MySQL wildcard patterns
 resolve_tables() {
   pattern="$1"  # e.g., cache_%
   mysql \
@@ -21,7 +22,7 @@ STRUCTURE_ONLY_TABLES="MYSQL_STRUCT_TABLES"
 IGNORE_TABLES_FULL_DUMP_CMD=""
 
 # 1. Dump schema-only for structure tables
-if [[ -n "$STRUCTURE_ONLY_TABLES" ]]; then
+if [ -n "$STRUCTURE_ONLY_TABLES" ]; then
   echo "Resolving structure-only tables..."
   STRUCTURE_ONLY_PATTERNS=$(echo "$STRUCTURE_ONLY_TABLES" | tr ',' ' ' | tr '*' '%')
   STRUCTURE_ONLY_TABLES_EXPANDED=""
@@ -51,7 +52,6 @@ if [[ -n "$STRUCTURE_ONLY_TABLES" ]]; then
   TMP_DATA='/tmp/data.sql'
 fi
 
-
 # 2. Dump full DB
 echo "Dumping full database..."
 $MYSQLDUMP \
@@ -67,18 +67,24 @@ $MYSQLDUMP \
   "MYSQL_DATABASE" > "$TMP_DATA"
 echo "✅ Dumped full database to: $TMP_DATA"
 
-
 # 3. Combine schema and data dumps if structure-only tables are specified
-if [[ -n "$STRUCTURE_ONLY_TABLES" ]]; then
+if [ -n "$STRUCTURE_ONLY_TABLES" ]; then
   echo "Combining schema and data dumps..."
   cat "$TMP_SCHEMA" "$TMP_DATA" > "/tmp/MYSQL_DATABASE"
 fi
 
+# 4. Strip lines containng "enable the sandbox mode" for compatibilty with old versions
+# See: https://github.com/drush-ops/drush/issues/6027
+sed -i '/enable the sandbox mode/d' "/tmp/MYSQL_DATABASE"
 
-# 4. Compress the final dump
-echo "Compressing the final dump..."
-gzip -"$GZIP_COMPRESSION_LEVEL" "/tmp/MYSQL_DATABASE"
+# 5. Compress the export
+echo "Compressing the export..."
+gzip -GZIP_COMPRESSION_LEVEL "/tmp/MYSQL_DATABASE"
 
-
-# 5. Move to final location
+# 6. Move to final location
 mv "/tmp/MYSQL_DATABASE.gz" "./MYSQL_DATABASE.gz"
+
+# 7. Clean up temporary files
+rm -f "$TMP_SCHEMA" "$TMP_DATA"
+
+echo "✅ MySQL backup completed successfully. Export saved to: ./MYSQL_DATABASE.gz"
