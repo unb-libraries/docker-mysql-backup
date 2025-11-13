@@ -106,8 +106,9 @@ For multi-database backups, you can specify structure-only tables per database u
 
 Examples:
 - Database `myapp` → `MYSQL_STRUCT_TABLES_MYAPP=cache_%,sessions`
-- Database `my-app` → `MYSQL_STRUCT_TABLES_MY_APP=cache_%,sessions`
-- Database `my.app` → `MYSQL_STRUCT_TABLES_MY_APP=cache_%,sessions`
+- Database `my_app` → `MYSQL_STRUCT_TABLES_MY_APP=cache_%,sessions` (underscore stays unchanged)
+- Database `my-app` → `MYSQL_STRUCT_TABLES_MY_APP=cache_%,sessions` (dash becomes underscore)
+- Database `my.app` → `MYSQL_STRUCT_TABLES_MY_APP=cache_%,sessions` (period becomes underscore)
 
 If no per-database configuration is found, the global `MYSQL_STRUCT_TABLES` value is used as a fallback.
 
