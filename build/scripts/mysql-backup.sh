@@ -79,6 +79,11 @@ backup_single_database() {
         --user="MYSQL_USER_NAME" \
         --password="MYSQL_USER_PASSWORD" \
         --no-data \
+        --routines \
+        --events \
+        --triggers \
+        --default-character-set=utf8mb4 \
+        --column-statistics=0 \
         --databases "$DB_NAME" \
         --tables $STRUCTURE_ONLY_TABLES_EXPANDED > "$TMP_SCHEMA"
       echo "✅ Dumped schema for structure tables to: $TMP_SCHEMA"
@@ -102,6 +107,13 @@ backup_single_database() {
     --single-transaction \
     --quick \
     --skip-lock-tables \
+    --routines \
+    --events \
+    --triggers \
+    --hex-blob \
+    --default-character-set=utf8mb4 \
+    --set-gtid-purged=OFF \
+    --column-statistics=0 \
     $IGNORE_TABLES_FULL_DUMP_CMD \
     "$DB_NAME" > "$TMP_DATA" 2>&1; then
     echo "❌ ERROR: Failed to dump database: $DB_NAME"
