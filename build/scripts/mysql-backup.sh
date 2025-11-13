@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 set -e  # Exit on error (but we'll handle it explicitly)
 
-MYSQLDUMP=/usr/bin/mysqldump
+MYSQLDUMP=/usr/bin/mariadb-dump
 BACKUP_FAILED=0  # Track if any database backup failed
 
 # Resolves existing table names based on MySQL wildcard patterns
