@@ -111,7 +111,6 @@ backup_single_database() {
     --triggers \
     --hex-blob \
     --default-character-set=utf8mb4 \
-    --set-gtid-purged=OFF \
     $IGNORE_TABLES_FULL_DUMP_CMD \
     "$DB_NAME" > "$TMP_DATA" 2>&1; then
     echo "❌ ERROR: Failed to dump database: $DB_NAME"
