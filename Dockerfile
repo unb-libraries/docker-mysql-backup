@@ -17,16 +17,16 @@ LABEL ca.unb.lib.generator="rsnapshot" \
   org.opencontainers.image.authors="Jacob Sanford <jsanford_at_unb.ca>" \
   org.opencontainers.image.source="https://github.com/unb-libraries/docker-mysql-backup"
 
-ENV MYSQL_HOSTNAME localhost
-ENV MYSQL_PORT 3306
-ENV MYSQL_USER_NAME root
-ENV MYSQL_USER_PASSWORD changeme
-ENV MYSQL_DUMP_LOCATION /data
+ENV MYSQL_HOSTNAME="localhost"
+ENV MYSQL_PORT="3306"
+ENV MYSQL_USER_NAME="root"
+ENV MYSQL_USER_PASSWORD="changeme"
+ENV MYSQL_DUMP_LOCATION="/data"
 
-ENV RSNAPSHOT_RETAIN_HOURLY 8
-ENV RSNAPSHOT_RETAIN_DAILY 7
-ENV RSNAPSHOT_RETAIN_WEEKLY 4
-ENV RSNAPSHOT_RETAIN_MONTHLY 6
+ENV RSNAPSHOT_RETAIN_HOURLY="8"
+ENV RSNAPSHOT_RETAIN_DAILY="7"
+ENV RSNAPSHOT_RETAIN_WEEKLY="4"
+ENV RSNAPSHOT_RETAIN_MONTHLY="6"
 
 RUN apk --update add rsnapshot mysql-client && \
   touch /var/log/rsnapshot.log && \
