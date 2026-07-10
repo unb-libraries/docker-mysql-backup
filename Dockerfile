@@ -1,5 +1,4 @@
 FROM alpine:3.13
-MAINTAINER Jacob Sanford <jsanford_at_unb.ca>
 
 ARG BUILD_DATE
 ARG VCS_REF
@@ -15,6 +14,7 @@ LABEL ca.unb.lib.generator="rsnapshot" \
   org.label-schema.vcs-url="https://github.com/unb-libraries/docker-mysql-backup" \
   org.label-schema.vendor="University of New Brunswick Libraries" \
   org.label-schema.version=$VERSION \
+  org.opencontainers.image.authors="Jacob Sanford <jsanford_at_unb.ca>" \
   org.opencontainers.image.source="https://github.com/unb-libraries/docker-mysql-backup"
 
 ENV MYSQL_HOSTNAME localhost
