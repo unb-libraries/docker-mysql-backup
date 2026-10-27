@@ -7,10 +7,9 @@ on:
 
 jobs:
   deploy:
-    uses: unb-libraries/dockworker/.github/workflows/build-push-notify.yaml@6.x
+    uses: unb-libraries/github-workflows/.github/workflows/publish-image.yaml@1.x
     with:
       image-name: 'ghcr.io/unb-libraries/mysql-backup'
-      push-branches: '["latest", "improved", "multi"]'
     secrets:
       GH_CONTAINER_REGISTRY_USER: ${{ secrets.GH_CONTAINER_REGISTRY_USER }}
       GH_CONTAINER_REGISTRY_TOKEN: ${{ secrets.GH_CONTAINER_REGISTRY_TOKEN }}
